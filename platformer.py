@@ -93,7 +93,7 @@ class game(pygame.Surface):
         return self.plats
 
 #Images for intro animation
-py_logo = pygame.image.load(os.path.join(g_dir, "pygame_powered_big2.png")).convert()
+py_logo = pygame.image.load(os.path.join(g_dir, "pygame_powered_big.png")).convert()
 my_logo = pygame.image.load(os.path.join(g_dir, "my_logo.png")).convert()
 
 #Intro animation
@@ -166,10 +166,9 @@ jump = False
 key_right = False
 key_left = False
 my_level = 0
-gravity = 1
+gravity = 2
 y_speed = 0
 x_speed = 0
-jump1 = False
 spawns = {0:(20+50, 575-50),
  1:(50, 10)}
 
@@ -191,7 +190,6 @@ while play:
                 break
             if event.key == pygame.K_w:
                 jump = False
-                jump1 = False
             if event.key == pygame.K_a:
                 key_left = False
             if event.key == pygame.K_d:
@@ -201,7 +199,7 @@ while play:
             if event.key == pygame.K_ESCAPE:
                 exit = True
                 break
-            if event.key == pygame.K_w and jump1 == False:
+            if event.key == pygame.K_w:
                 jump = True
             if event.key == pygame.K_a:
                 key_left = True
@@ -224,19 +222,21 @@ while play:
     if key_left == True:
         x_speed -= 5
     if jump == True:
-        y_speed = 10
+        y_speed -= 10
 
 
     g_surf.cube.move(x_speed, y_speed)
     if len(g_surf.cube.if_collide(g_surf.plats, False)) > 0:
         if key_right == True:
-            x_speed += -5
-        if key_left == True:
             x_speed -= 5
-        g_surf.cube.move(x_speed*-1, y_speed*-1)
+            g_surf.cube.move(x_speed, 0)
+        if key_left == True:
+            x_speed += 5
+            g_surf.cube.move(x_speed, 0)
 
-    if y_speed > 0:
-        y_speed -= gravity
+
+    if y_speed < 0:
+        y_speed += gravity
     #Drawing and rendering
     gameDisp.fill(BLACK)
     g_surf.render(gameDisp)
