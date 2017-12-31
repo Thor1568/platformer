@@ -170,8 +170,8 @@ key_right = False
 key_left = False
 my_level = 0
 gravity = 2
-y_speed = 0
-x_speed = 0
+y_pos = 0
+x_pos = 0
 spawns = {0:(20+50, 575-50),
  1:(50, 10)}
 
@@ -221,26 +221,23 @@ while play:
 
 
     if key_right == True:
-        x_speed += 5
+        x_pos += 5
     if key_left == True:
-        x_speed -= 5
+        x_pos -= 5
     if jump == True:
-        y_speed -= 10
+        y_pos -= 10
 
+    g_surf.cube.move(x_pos, y_pos)
 
-    g_surf.cube.move(x_speed, y_speed)
     if len(g_surf.cube.if_collide(g_surf.plats, False)) > 0:
         if key_right == True:
-            x_speed -= 5
-            g_surf.cube.move(x_speed, y_speed)
-        elif key_left == True:
-            x_speed += 5
-            g_surf.cube.move(x_speed, y_speed)
-#    print(("x_pos: "+ str(x_speed)) + (" y_pos: "+ str(y_speed)))
+            x_pos -= 10
+        if key_left == True:
+            x_pos += 10
+#    print(("x_pos: "+ str(x_pos)) + (" y_pos: "+ str(y_pos)))
 
-
-    if y_speed < 0:
-        y_speed += gravity
+    if y_pos < 0:
+        y_pos += gravity
     #Drawing and rendering
     gameDisp.fill(BLACK)
     g_surf.render(gameDisp)
