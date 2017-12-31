@@ -76,10 +76,13 @@ class game(pygame.Surface):
             floor = platform(800, 25, BLACK, (0, 575))
             plat1 = platform(75, 25, BLACK, (200, 450))
             plat2 = platform(25, 100, BLACK, (300, 475))
+            plat3 = platform(75, 25, BLACK, (375, 400))
+            plat4 = platform(75, 25, BLACK, (525, 300))
+            plat5 = platform(75, 100, BLACK, (200, 475))
             self.plats = pygame.sprite.Group()
             self.all_stuff = pygame.sprite.Group()
-            self.plats.add(floor, plat1, plat2)
-            self.all_stuff.add(floor, plat1, self.cube, plat2)
+            self.plats.add(floor, plat1, plat2, plat3, plat4, plat5)
+            self.all_stuff.add(floor, plat1, self.cube, plat2, plat3, plat4, plat5)
         if number == 1:
             pass
 
@@ -229,10 +232,11 @@ while play:
     if len(g_surf.cube.if_collide(g_surf.plats, False)) > 0:
         if key_right == True:
             x_speed -= 5
-            g_surf.cube.move(x_speed, 0)
-        if key_left == True:
+            g_surf.cube.move(x_speed, y_speed)
+        elif key_left == True:
             x_speed += 5
-            g_surf.cube.move(x_speed, 0)
+            g_surf.cube.move(x_speed, y_speed)
+#    print(("x_pos: "+ str(x_speed)) + (" y_pos: "+ str(y_speed)))
 
 
     if y_speed < 0:
