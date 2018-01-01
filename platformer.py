@@ -6,15 +6,26 @@ pygame.init()
 pygame.mixer.init()
 
 #Constant stuff
-dev_mode = True
+pygame.mouse.set_visible(False)
+dev_mode = False
 FPS = 60
-width = 800
-height = 600
-gameDisp = pygame.display.set_mode((width, height), 0, 32)
+WIDTH = 800
+HEIGHT = 600
+CTL_MODE = 0
+if dev_mode == False:
+    gameDisp = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN, 32)
+    full_screen = True
+else:
+    gameDisp = pygame.display.set_mode((WIDTH, HEIGHT), 0, 32)
+    full_screen = False
+    play = True
+    exit = False
 pygame.display.set_caption("Platformer game")
 g_dir = os.path.dirname(__file__)
-g_icon = pygame.image.load(os.path.join(g_dir, "icon.png"))
+img_dir = os.path.join(g_dir, "images")
+g_icon = pygame.image.load(os.path.join(img_dir, "icon.png"))
 pygame.display.set_icon(g_icon)
+pygame.mouse.set_cursor(*pygame.cursors.tri_left)
 g_clock = pygame.time.Clock()
 
 #Basic colors
@@ -67,7 +78,7 @@ class game(pygame.Surface):
         pygame.Surface.__init__(self, size=(width, height))
 
     def level(self, number):
-        self.cube = player(os.path.join(g_dir, "player.png"),
+        self.cube = player(os.path.join(img_dir, "player.png"),
             ((spawns[my_level])[0],
             (spawns[my_level])[1]))
         if number == 0:
@@ -88,7 +99,6 @@ class game(pygame.Surface):
 
     def render(self, display):
         self.fill(SKYBLUE)
-        self.all_stuff.update()
         self.all_stuff.draw(self)
         display.blit(self, (0,0))
 
@@ -96,8 +106,8 @@ class game(pygame.Surface):
         return self.plats
 
 #Images for intro animation
-py_logo = pygame.image.load(os.path.join(g_dir, "pygame_powered_big.png")).convert()
-my_logo = pygame.image.load(os.path.join(g_dir, "my_logo.png")).convert()
+py_logo = pygame.image.load(os.path.join(img_dir, "pygame_powered_big.png")).convert()
+my_logo = pygame.image.load(os.path.join(img_dir, "my_logo.png")).convert()
 
 #Intro animation
 if dev_mode == False:
@@ -150,21 +160,118 @@ if dev_mode == False:
         sleep(0.01)
         alpha -= 5
 
+    #Menu loop
+    menu = True
+    inst = False
+    menu_pic = pygame.image.load(os.path.join(img_dir, "game_logo.png")).convert()
+    alpha = 0
+    button1 = pygame.image.load(os.path.join(img_dir, "play_button.png")).convert()
+    button2 = pygame.image.load(os.path.join(img_dir, "help_button.png")).convert()
+    wasd_button_off_off = pygame.image.load(os.path.join(img_dir, "wasd_button.png")).convert()
+    wasd_button_off_on = pygame.image.load(os.path.join(img_dir, "wasd_button2.png")).convert()
+    arrow_button_off_off = pygame.image.load(os.path.join(img_dir, "arrow_button.png")).convert()
+    arrow_button_off_on = pygame.image.load(os.path.join(img_dir, "arrow_button2.png")).convert()
+    control_banner = pygame.image.load(os.path.join(img_dir, "control_banner.png")).convert()
+    fullsc_banner = pygame.image.load(os.path.join(img_dir, "fullsc_banner.png")).convert()
+    fulsc_on_off = pygame.image.load(os.path.join(img_dir, "fullsc_on.png")).convert()
+    fulsc_on_on = pygame.image.load(os.path.join(img_dir, "fullsc_on2.png")).convert()
+    fulsc_off_off = pygame.image.load(os.path.join(img_dir, "fullsc_off.png")).convert()
+    fulsc_off_on = pygame.image.load(os.path.join(img_dir, "fullsc_off2.png")).convert()
+    back_button = pygame.image.load(os.path.join(img_dir, "back_button.png")).convert()
+    sleep(1)
+    #menu art fading in
+    for x in range(52):
+        gameDisp.fill(BLACK)
+        gameDisp.blit(menu_pic, (0,0))
+        gameDisp.blit(button1, (200, 200))
+        gameDisp.blit(button2, (400, 200))
+        menu_pic.set_alpha(alpha)
+        button1.set_alpha(alpha)
+        button2.set_alpha(alpha)
+        pygame.display.flip()
+        sleep(0.01)
+        alpha += 5
+    menu_pic.set_alpha(255)
+    pygame.mouse.set_visible(True)
+#Menu Loop
+    while menu:
+        gameDisp.fill(BLACK)
+        #Mouse tuple contains: mouse x, mouse y, and if left click is down
+        mouse = (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1], pygame.mouse.get_pressed()[0])
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit = True
+                play = False
+                break
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    exit = True
+                    menu = False
+                    play = False
+                    break
+        if inst == False:
+            if mouse[2] == 1:
+                if ((mouse[0] >= 200) and (mouse[0] <= 400)) and ((mouse[1] <= 300) and (mouse[1] >= 200)):
+                    play = True
+                    menu = False
+                    exit = False
+                    mouse = (0,0,0)
+                if ((mouse[0] >= 400) and (mouse[0] <= 600)) and ((mouse[1] <= 300) and (mouse[1] >= 200)):
+                    inst = True
+        else:
+            if mouse[2] == 1:
+                if ((mouse[0] >= 200) and (mouse[0] <= 400)) and ((mouse[1] <= 250) and (mouse[1] >= 200)):
+                    #if WASD control on is clicked
+                    CTL_MODE = 0
+                    mouse = (0,0,0)
+                if ((mouse[0] >= 200) and (mouse[0] <= 400)) and ((mouse[1] <= 300) and (mouse[1] >= 250)):
+                    #if arrow_key control on is clicked
+                    CTL_MODE = 1
+                    mouse = (0,0,0)
+                if ((mouse[0] >= 400) and (mouse[0] <= 600)) and ((mouse[1] <= 300) and (mouse[1] >= 250)):
+                    #if full screen on is clicked
+                    print(full_screen)
+                    if full_screen == False:
+                        full_screen = True
+                        gameDisp = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN, 32)
+                    mouse = (0,0,0)
+                if ((mouse[0] >= 400) and (mouse[0] <= 600)) and ((mouse[1] <= 250) and (mouse[1] >= 200)):
+                    #if full screen off on is clicked
+                    print(full_screen)
+                    if full_screen == True:
+                        full_screen = False
+                        gameDisp = pygame.display.set_mode((WIDTH, HEIGHT), 0, 32)
+                    mouse = (0,0,0)
+                if ((mouse[0] >= 384) and (mouse[0] <= 579)) and ((mouse[1] <= 381) and (mouse[1] >= 331)):
+                    inst = False
 
-#Menu loop
-menu = False
-inst = False
-sett = False
+        #Drawing
+        gameDisp.blit(menu_pic, (0,0))
+        if inst == False:
+            gameDisp.blit(button1, (200, 200))
+            gameDisp.blit(button2, (400, 200))
+        if inst == True:
+            if CTL_MODE == 0:
+                gameDisp.blit(wasd_button_off_on, (200, 200))
+                gameDisp.blit(arrow_button_off_off, (200, 250))
+            else:
+                gameDisp.blit(wasd_button_off_off, (200, 200))
+                gameDisp.blit(arrow_button_off_on, (200, 250))
+            gameDisp.blit(control_banner, (200, 150))
+            if full_screen == True:
+                gameDisp.blit(fulsc_off_off, (400, 200))
+                gameDisp.blit(fulsc_on_on, (400,250))
+            else:
+                gameDisp.blit(fulsc_off_on, (400, 200))
+                gameDisp.blit(fulsc_on_off, (400,250))
+            gameDisp.blit(fullsc_banner, (400, 150))
+            gameDisp.blit(back_button, (384, 331))
 
-while menu:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            break
-            exit = True
+        pygame.display.flip()
+        g_clock.tick(FPS)
 
-
+pygame.mouse.set_visible(True)
 #Variables
-play = True
 jump = False
 key_right = False
 key_left = False
@@ -172,15 +279,20 @@ my_level = 0
 gravity = 2
 y_pos = 0
 x_pos = 0
+ch_x = 0
+ch_y = 0
 spawns = {0:(20+50, 575-50),
  1:(50, 10)}
 
 #objects
-g_surf = game(width, height)
+g_surf = game(WIDTH, HEIGHT)
 g_surf.level(my_level)
 
 #game loop
-while play:
+while play and (not exit):
+    gameDisp.fill(BLACK)
+    ch_x = 0
+    ch_y = 0
     #Game events/logic
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -191,57 +303,78 @@ while play:
             if event.key == pygame.K_ESCAPE:
                 exit = True
                 break
-            if event.key == pygame.K_w:
-                jump = False
-            if event.key == pygame.K_a:
-                key_left = False
-            if event.key == pygame.K_d:
-                key_right = False
+            if CTL_MODE == 0:
+                if event.key == pygame.K_w:
+                    jump = False
+                if event.key == pygame.K_a:
+                    key_left = False
+                if event.key == pygame.K_d:
+                    key_right = False
+            if CTL_MODE == 1:
+                if event.key == pygame.K_UP:
+                    jump = False
+                if event.key == pygame.K_LEFT:
+                    key_left = False
+                if event.key == pygame.K_RIGHT:
+                    key_right = False
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 exit = True
                 break
-            if event.key == pygame.K_w:
-                jump = True
-            if event.key == pygame.K_a:
-                key_left = True
-            if event.key == pygame.K_d:
-                key_right = True
+            if CTL_MODE == 0:
+                if event.key == pygame.K_w:
+                    jump = True
+                if event.key == pygame.K_a:
+                    key_left = True
+                if event.key == pygame.K_d:
+                    key_right = True
+            if CTL_MODE == 1:
+                if event.key == pygame.K_UP:
+                    jump = True
+                if event.key == pygame.K_LEFT:
+                    key_left = True
+                if event.key == pygame.K_RIGHT:
+                    key_right = True
             if event.key == pygame.K_f:
                 pygame.display.toggle_fullscreen()
 
 
-    if exit == True:
-        play = False
-        break
+##    if exit == True:
+##        play = False
+##        break
 
     #Sprite/group updates
     g_surf.level(my_level)
 
 
     if key_right == True:
-        x_pos += 5
+        ch_x = 5
     if key_left == True:
-        x_pos -= 5
+        ch_x = -5
     if jump == True:
-        y_pos -= 10
+        ch_y = -10
 
+    x_pos += ch_x
+    y_pos += ch_y
     g_surf.cube.move(x_pos, y_pos)
-
     if len(g_surf.cube.if_collide(g_surf.plats, False)) > 0:
-        if key_right == True:
-            x_pos -= 10
-        if key_left == True:
-            x_pos += 10
+        x_pos -= ch_x
+        y_pos -= ch_y
+        g_surf.cube.move(x_pos, y_pos)
 #    print(("x_pos: "+ str(x_pos)) + (" y_pos: "+ str(y_pos)))
 
-    if y_pos < 0:
+    if (y_pos < 0) and (not (len(g_surf.cube.if_collide(g_surf.plats, False)) > 0)):
         y_pos += gravity
     #Drawing and rendering
-    gameDisp.fill(BLACK)
     g_surf.render(gameDisp)
     pygame.display.flip()
     g_clock.tick(60)
 
 pygame.quit()
+
+#    move_group(district1, (my_x, my_y))
+#    if person.if_collide(can_collide, False):
+#        my_x -= ch_x
+#        my_y -= ch_y
+#        move_group(district1, (my_x, my_y))
