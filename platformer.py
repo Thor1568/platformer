@@ -15,6 +15,8 @@ FPS = 60
 WIDTH = 800
 HEIGHT = 600
 CTL_MODE = 0
+BASE_SAVE = """Pygame Platformer save file
+level = 0"""
 if dev_mode == False:
     gameDisp = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN, 32)
     full_screen = True
@@ -30,6 +32,14 @@ g_icon = pygame.image.load(os.path.join(img_dir, "icon.png"))
 pygame.display.set_icon(g_icon)
 pygame.mouse.set_cursor(*pygame.cursors.tri_left)
 g_clock = pygame.time.Clock()
+save_file = open(os.path.join(g_dir, "save.txt"), "r+")
+file_info = save_file.read()
+if len(file_info) > 0:
+    #do not write to save file and take info to use when launching game
+    pass
+else:
+    save_file.write(BASE_SAVE)
+save_file.close()
 
 #Basic colors
 BLACK = (0,0,0)
@@ -215,6 +225,7 @@ if dev_mode == False:
                     menu = False
                     play = False
                     break
+        #Button clicking check
         if inst == False:
             if mouse[2] == 1:
                 if ((mouse[0] >= 200) and (mouse[0] <= 400)) and ((mouse[1] <= 300) and (mouse[1] >= 200)):
@@ -236,14 +247,12 @@ if dev_mode == False:
                     mouse = (0,0,0)
                 if ((mouse[0] >= 400) and (mouse[0] <= 600)) and ((mouse[1] <= 300) and (mouse[1] >= 250)):
                     #if full screen on is clicked
-                    print(full_screen)
                     if full_screen == False:
                         full_screen = True
                         gameDisp = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN, 32)
                     mouse = (0,0,0)
                 if ((mouse[0] >= 400) and (mouse[0] <= 600)) and ((mouse[1] <= 250) and (mouse[1] >= 200)):
                     #if full screen off on is clicked
-                    print(full_screen)
                     if full_screen == True:
                         full_screen = False
                         gameDisp = pygame.display.set_mode((WIDTH, HEIGHT), 0, 32)
@@ -343,9 +352,6 @@ while play and (not exit):
                     key_left = True
                 if event.key == pygame.K_RIGHT:
                     key_right = True
-            if event.key == pygame.K_f:
-                pygame.display.toggle_fullscreen()
-
 
 ##    if exit == True:
 ##        play = False

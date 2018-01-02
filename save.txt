@@ -1,0 +1,2 @@
+Pygame Platformer save file
+level = 0
