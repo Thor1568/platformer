@@ -5,6 +5,9 @@ from time import sleep
 pygame.init()
 pygame.mixer.init()
 
+#Note to self:
+#All fonts are Century gothic and antialiased
+
 #Constant stuff
 pygame.mouse.set_visible(False)
 dev_mode = False
@@ -180,6 +183,7 @@ if dev_mode == False:
     fulsc_off_off = pygame.image.load(os.path.join(img_dir, "fullsc_off.png")).convert()
     fulsc_off_on = pygame.image.load(os.path.join(img_dir, "fullsc_off2.png")).convert()
     back_button = pygame.image.load(os.path.join(img_dir, "back_button.png")).convert()
+    inst_text = pygame.image.load(os.path.join(img_dir, "instructions_text.png")).convert()
     sleep(1)
     #menu art fading in
     for x in range(52):
@@ -268,6 +272,7 @@ if dev_mode == False:
                 gameDisp.blit(fulsc_on_off, (400,250))
             gameDisp.blit(fullsc_banner, (400, 150))
             gameDisp.blit(back_button, (384, 331))
+            gameDisp.blit(inst_text, (15, 480))
 
         pygame.display.flip()
         g_clock.tick(FPS)
