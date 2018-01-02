@@ -85,15 +85,17 @@ class game(pygame.Surface):
             #Level tutorial
             #platform(width, height, color, (x, y))
             floor = platform(800, 25, BLACK, (0, 575))
+            wall1 = platform(10, 600, BLACK, (-10, 0))
+            wall2 = platform(10, 600, BLACK, (800, 0))
+            ceiling = platform(800, 10, BLACK, (0, -10))
             plat1 = platform(75, 25, BLACK, (200, 450))
-            plat2 = platform(25, 100, BLACK, (300, 475))
             plat3 = platform(75, 25, BLACK, (375, 400))
             plat4 = platform(75, 25, BLACK, (525, 300))
-            plat5 = platform(75, 100, BLACK, (200, 475))
+#            plat5 = platform(75, 100, BLACK, (200, 475))
             self.plats = pygame.sprite.Group()
             self.all_stuff = pygame.sprite.Group()
-            self.plats.add(floor, plat1, plat2, plat3, plat4, plat5)
-            self.all_stuff.add(floor, plat1, self.cube, plat2, plat3, plat4, plat5)
+            self.plats.add(floor, plat1,plat3, plat4, ceiling, wall1, wall2) #, plat5)
+            self.all_stuff.add(floor, plat1, self.cube, plat3, plat4, ceiling, wall1, wall2)#, plat5)
         if number == 1:
             pass
 
@@ -276,12 +278,14 @@ jump = False
 key_right = False
 key_left = False
 my_level = 0
-gravity = 2
+gravity = 1
 y_pos = 0
 x_pos = 0
 ch_x = 0
 ch_y = 0
-spawns = {0:(20+50, 575-50),
+jump_speed = 18
+move_speed = 0.5
+spawns = {0:(20+25, 575-25),
  1:(50, 10)}
 
 #objects
@@ -291,8 +295,6 @@ g_surf.level(my_level)
 #game loop
 while play and (not exit):
     gameDisp.fill(BLACK)
-    ch_x = 0
-    ch_y = 0
     #Game events/logic
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -344,37 +346,40 @@ while play and (not exit):
 ##        play = False
 ##        break
 
-    #Sprite/group updates
-    g_surf.level(my_level)
-
-
-    if key_right == True:
-        ch_x = 5
-    if key_left == True:
-        ch_x = -5
     if jump == True:
-        ch_y = -10
+        ch_y -= jump_speed
+        jump = False
+    if key_right == True:
+        ch_x += move_speed
+    elif key_left == True:
+        ch_x -= move_speed
+    else:
+        if ch_x > 0:
+            ch_x -= move_speed
+        if ch_x < 0:
+            ch_x += move_speed
 
     x_pos += ch_x
     y_pos += ch_y
-    g_surf.cube.move(x_pos, y_pos)
-    if len(g_surf.cube.if_collide(g_surf.plats, False)) > 0:
-        x_pos -= ch_x
-        y_pos -= ch_y
-        g_surf.cube.move(x_pos, y_pos)
-#    print(("x_pos: "+ str(x_pos)) + (" y_pos: "+ str(y_pos)))
 
-    if (y_pos < 0) and (not (len(g_surf.cube.if_collide(g_surf.plats, False)) > 0)):
-        y_pos += gravity
+    #Move x position and check for collision
+    g_surf.cube.move(ch_x, 0)
+    if len(g_surf.cube.if_collide(g_surf.plats, False)) > 0:
+        g_surf.cube.move(ch_x*-1, 0)
+        ch_x = 0
+
+    #move y position and check for collision
+    g_surf.cube.move(0, ch_y)
+    if len(g_surf.cube.if_collide(g_surf.plats, False)) > 0:
+        g_surf.cube.move(0, ch_y*-1)
+        ch_y = 0
+
+    #Always pulling the square down
+    ch_y += gravity
+
     #Drawing and rendering
     g_surf.render(gameDisp)
     pygame.display.flip()
     g_clock.tick(60)
 
 pygame.quit()
-
-#    move_group(district1, (my_x, my_y))
-#    if person.if_collide(can_collide, False):
-#        my_x -= ch_x
-#        my_y -= ch_y
-#        move_group(district1, (my_x, my_y))
