@@ -10,7 +10,7 @@ pygame.mixer.init()
 
 #Constant stuff
 pygame.mouse.set_visible(False)
-dev_mode = True
+dev_mode = False
 FPS = 60
 WIDTH = 800
 HEIGHT = 600
@@ -94,6 +94,9 @@ class game(pygame.Surface):
 
     def level(self, number):
         self.time = 0
+        self.plats = pygame.sprite.Group()
+        self.all_stuff = pygame.sprite.Group()
+        self.goal = pygame.sprite.Group()
         self.cube = player(os.path.join(img_dir, "player.png"),
             ((spawns[my_level])[0],
             (spawns[my_level])[1]))
@@ -109,21 +112,17 @@ class game(pygame.Surface):
             wall1 = platform(10, 600, BLACK, (-10, 0))
             wall2 = platform(10, 600, BLACK, (800, 0))
             ceiling = platform(800, 10, BLACK, (0, -10))
-            plat1 = platform(75, 25, BLACK, (200, 450))
-            plat3 = platform(75, 25, BLACK, (375, 400))
-            plat4 = platform(75, 25, BLACK, (525, 300))
+            plat1 = player(os.path.join(img_dir, "75x25_plat.png"), (200, 450))
+            plat3 = player(os.path.join(img_dir, "75x25_plat.png"), (375, 400))
+            plat4 = player(os.path.join(img_dir, "75x25_plat.png"), (525, 300))
 
             #Special objects
             level_goal = player(os.path.join(img_dir, "goal.png"),
                 ((goals[my_level])[0],
                 (goals[my_level])[1]))
 
-            self.plats = pygame.sprite.Group()
-            self.all_stuff = pygame.sprite.Group()
-            self.goal = pygame.sprite.Group()
-            self.goal.add(level_goal)
-            self.plats.add(floor, plat1,plat3, plat4, ceiling, wall1, wall2)
-            self.all_stuff.add(floor, level_goal, plat1, self.cube, plat3, plat4, ceiling, wall1, wall2)
+
+            self.plats.add(floor, plat1, plat3, plat4, ceiling, wall1, wall2)
 
         if number == 1:
             self.text_surf1 = self.font_ui.render("Level: 1-2", True, WHITE)
@@ -132,7 +131,10 @@ class game(pygame.Surface):
             wall1 = platform(10, 600, BLACK, (-10, 0))
             wall2 = platform(10, 600, BLACK, (800, 0))
             ceiling = platform(800, 10, BLACK, (0, -10))
-            plat1 = player(os.path.join(img_dir, "75x25_plat.png"), (200, 450))
+            plat1 = player(os.path.join(img_dir, "725x25_plat.png"), (0, 435))
+            plat2 = player(os.path.join(img_dir, "725x25_plat.png"), (75, 300))
+            plat3 = player(os.path.join(img_dir, "75x25_plat.png"), (325, 165))
+            plat4 = player(os.path.join(img_dir, "75x25_plat.png"), (725, 150))
 
             #End goal
             level_goal = player(os.path.join(img_dir, "goal.png"),
@@ -140,13 +142,11 @@ class game(pygame.Surface):
                 (goals[my_level])[1]))
 
             #Groups
-            self.plats = pygame.sprite.Group()
-            self.all_stuff = pygame.sprite.Group()
-            self.goal = pygame.sprite.Group()
-            self.goal.add(level_goal)
-            self.plats.add(floor, ceiling, wall1, wall2, plat1)
-            self.all_stuff.add(floor, level_goal, plat1, self.cube, ceiling, wall1, wall2, plat1)
 
+            self.plats.add(floor, ceiling, wall1, wall2, plat1, plat2, plat3, plat4)
+
+        self.goal.add(level_goal)
+        self.all_stuff.add(self.plats, self.cube, self.goal)
         self.text_to_blit = [self.text_surf1, self.text_surf2]
 
     def render(self, display):
@@ -296,12 +296,14 @@ if dev_mode == False:
                     if full_screen == False:
                         full_screen = True
                         gameDisp = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN, 32)
+                        pygame.display.set_icon(g_icon)
                     mouse = (0,0,0)
                 if ((mouse[0] >= 400) and (mouse[0] <= 600)) and ((mouse[1] <= 250) and (mouse[1] >= 200)):
                     #if full screen off on is clicked
                     if full_screen == True:
                         full_screen = False
                         gameDisp = pygame.display.set_mode((WIDTH, HEIGHT), 0, 32)
+                        pygame.display.set_icon(g_icon)
                     mouse = (0,0,0)
                 if ((mouse[0] >= 384) and (mouse[0] <= 579)) and ((mouse[1] <= 381) and (mouse[1] >= 331)):
                     inst = False
@@ -343,7 +345,7 @@ y_pos = 0
 x_pos = 0
 ch_x = 0
 ch_y = 0
-jump_speed = 18
+jump_speed = 20
 move_speed = 0.5
 #add spawn x+25 and y-25 to make sure the square goes where it is supposed to and track bottom right corner instead of top left
 spawns = {0:(20+25, 575-25),
