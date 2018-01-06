@@ -10,7 +10,7 @@ pygame.mixer.init()
 
 #Constant stuff
 pygame.mouse.set_visible(False)
-dev_mode = False
+dev_mode = True
 FPS = 60
 WIDTH = 800
 HEIGHT = 600
@@ -89,12 +89,20 @@ class platform(pygame.sprite.Sprite):
 class game(pygame.Surface):
     def __init__(self, width, height):
         pygame.Surface.__init__(self, size=(width, height))
+        self.font_ui = pygame.font.SysFont(None, 36)
+        self.time = 0
 
     def level(self, number):
+        self.time = 0
         self.cube = player(os.path.join(img_dir, "player.png"),
             ((spawns[my_level])[0],
             (spawns[my_level])[1]))
+        #UI text
+
+        self.text_surf2 = self.font_ui.render("Time: %s" % self.time, True, WHITE)
+
         if number == 0:
+            self.text_surf1 = self.font_ui.render("Level: 1-1", True, WHITE)
             #Level tutorial
             #platform(width, height, color, (x, y))
             floor = platform(800, 25, BLACK, (0, 575))
@@ -104,21 +112,59 @@ class game(pygame.Surface):
             plat1 = platform(75, 25, BLACK, (200, 450))
             plat3 = platform(75, 25, BLACK, (375, 400))
             plat4 = platform(75, 25, BLACK, (525, 300))
-#            plat5 = platform(75, 100, BLACK, (200, 475))
+
+            #Special objects
+            level_goal = player(os.path.join(img_dir, "goal.png"),
+                ((goals[my_level])[0],
+                (goals[my_level])[1]))
+
             self.plats = pygame.sprite.Group()
             self.all_stuff = pygame.sprite.Group()
-            self.plats.add(floor, plat1,plat3, plat4, ceiling, wall1, wall2) #, plat5)
-            self.all_stuff.add(floor, plat1, self.cube, plat3, plat4, ceiling, wall1, wall2)#, plat5)
+            self.goal = pygame.sprite.Group()
+            self.goal.add(level_goal)
+            self.plats.add(floor, plat1,plat3, plat4, ceiling, wall1, wall2)
+            self.all_stuff.add(floor, level_goal, plat1, self.cube, plat3, plat4, ceiling, wall1, wall2)
+
         if number == 1:
-            pass
+            self.text_surf1 = self.font_ui.render("Level: 1-2", True, WHITE)
+            #Create platforms
+            floor = platform(800, 25, BLACK, (0, 575))
+            wall1 = platform(10, 600, BLACK, (-10, 0))
+            wall2 = platform(10, 600, BLACK, (800, 0))
+            ceiling = platform(800, 10, BLACK, (0, -10))
+            plat1 = player(os.path.join(img_dir, "75x25_plat.png"), (200, 450))
+
+            #End goal
+            level_goal = player(os.path.join(img_dir, "goal.png"),
+                ((goals[my_level])[0],
+                (goals[my_level])[1]))
+
+            #Groups
+            self.plats = pygame.sprite.Group()
+            self.all_stuff = pygame.sprite.Group()
+            self.goal = pygame.sprite.Group()
+            self.goal.add(level_goal)
+            self.plats.add(floor, ceiling, wall1, wall2, plat1)
+            self.all_stuff.add(floor, level_goal, plat1, self.cube, ceiling, wall1, wall2, plat1)
+
+        self.text_to_blit = [self.text_surf1, self.text_surf2]
 
     def render(self, display):
+        self.text_surf2 = self.font_ui.render("Time: %s" % self.time, True, WHITE)
+        self.text_to_blit[1] = self.text_surf2
         self.fill(SKYBLUE)
         self.all_stuff.draw(self)
+        temp = 0
+        for text in self.text_to_blit:
+            self.blit(text, (10, 10+temp))
+            temp += 30
         display.blit(self, (0,0))
 
     def return_plats(self):
         return self.plats
+
+    def tick_timer(self):
+        self.time += 1
 
 #Images for intro animation
 py_logo = pygame.image.load(os.path.join(img_dir, "pygame_powered_big.png")).convert()
@@ -299,12 +345,19 @@ ch_x = 0
 ch_y = 0
 jump_speed = 18
 move_speed = 0.5
+#add spawn x+25 and y-25 to make sure the square goes where it is supposed to and track bottom right corner instead of top left
 spawns = {0:(20+25, 575-25),
- 1:(50, 10)}
+ 1:(20+25, 575-25)}
+
+goals = {0:(562.5-25, 300-50),
+ 1:(750, 100)}
 
 #objects
 g_surf = game(WIDTH, HEIGHT)
 g_surf.level(my_level)
+#Event number 25 is id
+one_second = 25
+pygame.time.set_timer(one_second, 1000)
 
 #game loop
 while play and (not exit):
@@ -338,6 +391,8 @@ while play and (not exit):
             if event.key == pygame.K_ESCAPE:
                 exit = True
                 break
+            if event.key == pygame.K_r:
+                g_surf.level(my_level)
             if CTL_MODE == 0:
                 if event.key == pygame.K_w:
                     jump = True
@@ -352,6 +407,8 @@ while play and (not exit):
                     key_left = True
                 if event.key == pygame.K_RIGHT:
                     key_right = True
+        if event.type == one_second:
+            g_surf.tick_timer()
 
 ##    if exit == True:
 ##        play = False
@@ -384,6 +441,18 @@ while play and (not exit):
     if len(g_surf.cube.if_collide(g_surf.plats, False)) > 0:
         g_surf.cube.move(0, ch_y*-1)
         ch_y = 0
+
+    #Double check collisions to prevent going in the side of platforms
+    if len(g_surf.cube.if_collide(g_surf.plats, False)) > 0:
+        g_surf.cube.move(ch_x*-1, ch_y*-1)
+        ch_y = 0
+        ch_x = 0
+
+    #Check if collision with the goal
+    if len(g_surf.cube.if_collide(g_surf.goal, False)) > 0:
+        #Level change animation or whatever
+        my_level += 1
+        g_surf.level(my_level)
 
     #Always pulling the square down
     ch_y += gravity
